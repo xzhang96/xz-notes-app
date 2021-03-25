@@ -76,7 +76,7 @@ export default function Notes() {
 
     try {
       if (file.current) {
-        // await Storage.vault.remove(note.attachment);
+        await Storage.vault.remove(note.attachment);
         attachment = await s3Upload(file.current);
       }
   
@@ -91,6 +91,10 @@ export default function Notes() {
     }
   }
 
+  function deleteNote() {
+    return API.del("notes", `/notes/${id}`);
+  }
+
   async function handleDelete(event) {
     event.preventDefault();
   
@@ -103,6 +107,15 @@ export default function Notes() {
     }
   
     setIsDeleting(true);
+
+    try {
+      await Storage.vault.remove(note.attachment);
+      await deleteNote();
+      history.push("/");
+    } catch (e) {
+      onError(e);
+      setIsDeleting(false);
+    }
   }
 
   return (
